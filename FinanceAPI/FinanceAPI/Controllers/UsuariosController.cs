@@ -12,23 +12,42 @@ namespace FinanceAPI.Controllers
     public class UsuariosController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
-        private readonly IMapper _mapper;
-        public UsuariosController(IUnitOfWork uow, IMapper mapper)
+        /// <summary>
+        /// Acesso a todos os repositorios
+        /// </summary>
+        /// <param name="uow"></param>
+        public UsuariosController(IUnitOfWork uow)
         {
             _uow = uow;
-            _mapper = mapper;
         }
 
+        /// <summary>
+        ///  Buscar o registro por id, usado em todos os endpoints
+        ///  
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Usuario localizado no banco ou objeto padrao, sem tracking para persistir no banco</returns>
         private Usuario get(Guid id)
         {
             return asQueryable().Where(usuarioDb => usuarioDb.Id == id).AsNoTracking().FirstOrDefault();
         }
+        /// <summary>
+        /// Prove query para realizar buscas no banco.
+        /// </summary>
+        /// <returns></returns>
         private IQueryable<Usuario> asQueryable()
         {
             return _uow.UsuarioRepository.AsQueryable();
         }
-
-
+        /// <summary>
+        /// Endpoint para buscar usuario no banco:
+        /// Se for passado um Id deve retornar um usuario unico;
+        /// Se não é retornado uma lista do tipo PageList (modelo PO-UI)
+        /// </summary>
+        /// <param name="pageParams">Parametros padroes para paginaçao e demais entidades</param>
+        /// <param name="nome">Paramero para filtrar por nome com paginacao</param>
+        /// <param name="email">Parametro para filtrar por email com paginacao</param>
+        /// <returns>Usuario, ApiReturn, ou PageList</returns>
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] PageParams pageParams, string? nome, string? email)
         {
@@ -64,7 +83,6 @@ namespace FinanceAPI.Controllers
                         case "email": queryable = queryable.OrderBy(u => u.Email); break;
                     }
 
-
                     if (pageParams.Filter.Length > 0)
                         queryable = queryable
                             .Where(u => 
@@ -92,7 +110,11 @@ namespace FinanceAPI.Controllers
                 });
             }
         }
-
+        /// <summary>
+        /// Adiciona usuario ao db
+        /// </summary>
+        /// <param name="usuario">Usuario usado para persistir no banco</param>
+        /// <returns>Usuario persistido no banco ou ApiReturn se ocorrer erro</returns>
         [HttpPost]
         public IActionResult Add(Usuario usuario)
         {
@@ -114,6 +136,11 @@ namespace FinanceAPI.Controllers
                 });
             }
         }
+        /// <summary>
+        /// Edita usuario baseado no id
+        /// </summary>
+        /// <param name="usuario">Usuario usado para persistir no banco</param>
+        /// <returns>Usuario persistido no banco ou ApiReturn se ocorrer erro</returns>
         [HttpPut]
         public IActionResult Edit(Usuario usuario)
         {
@@ -145,6 +172,11 @@ namespace FinanceAPI.Controllers
 
         }
 
+        /// <summary>
+        /// Remove usuario baseado no id
+        /// </summary>
+        /// <param name="id">id do usuario</param>
+        /// <returns>ApiReturn indicado o sucesso ou falha</returns>
         [HttpDelete]
         public IActionResult Delete(Guid id)
         {
@@ -160,7 +192,11 @@ namespace FinanceAPI.Controllers
 
                 _uow.UsuarioRepository.Delete(usuarioAtual);
                 _uow.Commit();
-                return Ok();
+                return Ok(new ApiReturn()
+                    {
+                        Sucess = true,
+                        Message = $"Registro removido com sucesso!"
+                    });
             }
             catch (Exception e)
             {

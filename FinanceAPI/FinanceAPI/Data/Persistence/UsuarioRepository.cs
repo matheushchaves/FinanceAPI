@@ -13,7 +13,7 @@ namespace FinanceAPI.Data.Persistence
 
         }
 
-        public IQueryable<Usuario> AsQueryable()
+        public new IQueryable<Usuario> AsQueryable()
         {
             return _context.Usuarios.AsQueryable<Usuario>();
         }
