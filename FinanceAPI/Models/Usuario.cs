@@ -9,6 +9,7 @@ namespace FinanceAPI.Models
         [Required(ErrorMessage = "Email é obrigatório")]
         public string Email { get; set; } = "";
         [Required(ErrorMessage = "Senha é obrigatório")]
+        [DataType(DataType.Password)]
         public string Senha { get; set; }
         [Required(ErrorMessage = "Nome é obrigatório")] 
         public string Nome { get; set; }
