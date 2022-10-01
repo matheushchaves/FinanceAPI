@@ -9,5 +9,20 @@ namespace FinanceAPI.Data.Context
 
         public DbSet<Usuario> Usuarios { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Usuario>().HasData(
+            new Usuario
+            {        
+                Id = new Guid("79aed679-3622-42ae-8f59-1dd31cede462"),
+                Nome = "Administrador",
+                Email = "matheushchaves@gmail.com",
+                Senha = "1Qaz!@#",
+                Regra = "ADMIN"
+            });
+
+            modelBuilder.Entity<Usuario>().HasIndex(u => u.Email).IsUnique();
+        }
+
     }
 }

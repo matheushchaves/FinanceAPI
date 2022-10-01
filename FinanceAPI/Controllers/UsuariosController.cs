@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using FinanceAPI.Data;
+using FinanceAPI.Data.DTOs;
 using FinanceAPI.Helpers.Http;
 using FinanceAPI.Models;
+using FinanceAPI.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,6 +52,7 @@ namespace FinanceAPI.Controllers
         /// <param name="email">Parametro para filtrar por email com paginacao</param>
         /// <returns>Usuario, ApiReturn, ou PageList</returns>
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Get([FromQuery] PageParams pageParams, string? nome, string? email)
         {
             try
@@ -116,6 +120,7 @@ namespace FinanceAPI.Controllers
         /// <param name="usuario">Usuario usado para persistir no banco</param>
         /// <returns>Usuario persistido no banco ou ApiReturn se ocorrer erro</returns>
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult Add(Usuario usuario)
         {
             try
@@ -142,6 +147,7 @@ namespace FinanceAPI.Controllers
         /// <param name="usuario">Usuario usado para persistir no banco</param>
         /// <returns>Usuario persistido no banco ou ApiReturn se ocorrer erro</returns>
         [HttpPut]
+        [Authorize]
         public IActionResult Edit(Usuario usuario)
         {
             try
@@ -178,6 +184,7 @@ namespace FinanceAPI.Controllers
         /// <param name="id">id do usuario</param>
         /// <returns>ApiReturn indicado o sucesso ou falha</returns>
         [HttpDelete]
+        [Authorize]
         public IActionResult Delete(Guid id)
         {
             try
@@ -208,6 +215,31 @@ namespace FinanceAPI.Controllers
                 });
             }
 
+        }
+
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<ActionResult<dynamic>> Authenticate([FromBody] LoginDTO login)
+        {
+            // Recupera o usuário
+            var user = asQueryable().Where<Usuario>(u => u.Email.ToLower().Equals(login.Email.ToLower()) && u.Senha.Equals(login.Senha)).AsNoTracking().SingleOrDefault();
+
+            // Verifica se o usuário existe
+            if (user == null)
+                return NotFound(new ApiReturn() { Sucess = false, Message= $"Usuário {login.Email} não encontrado!"});
+
+            // Gera o Token
+            var token = TokenService.GenerateToken(user);
+
+            // Oculta a senha
+            user.Senha = "";
+
+            // Retorna os dados
+            return new ApiReturn(){
+                Sucess = true,
+                Message = "Login realizado com sucesso!",
+                Detail = token 
+            };
         }
 
     }
