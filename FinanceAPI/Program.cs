@@ -46,6 +46,17 @@ builder.Services.AddSwaggerGen(s =>
             });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "DevPolicy",
+                      policy =>
+                      {
+                          policy.WithOrigins("*")
+                          .AllowAnyHeader()
+                            .AllowAnyMethod();
+                      });
+});
+
 string mySqlConnection = builder.Configuration["DATABASE"];
 
 builder.Services.AddDbContext<AppDataContext>(options =>
@@ -74,6 +85,7 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+
 builder.Services.AddHttpLogging(logging =>
 {
     logging.LoggingFields = HttpLoggingFields.All;
@@ -99,6 +111,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors();
 
 app.MapControllers();
 
