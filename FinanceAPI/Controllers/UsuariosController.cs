@@ -5,6 +5,7 @@ using FinanceAPI.Helpers.Http;
 using FinanceAPI.Models;
 using FinanceAPI.Service;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,6 +54,7 @@ namespace FinanceAPI.Controllers
         /// <returns>Usuario, ApiReturn, ou PageList</returns>
         [HttpGet]
         [Authorize]
+        [EnableCors("DevPolicy")]
         public async Task<IActionResult> Get([FromQuery] PageParams pageParams, string? nome, string? email)
         {
             try
@@ -60,7 +62,7 @@ namespace FinanceAPI.Controllers
                 if (pageParams is null)
                     return BadRequest(new ApiReturn()
                     {
-                        Sucess = false,
+                        Code = "400",
                         Message = $"Parâmetros não existem!"
                     });
                 if (pageParams.Id != null)
@@ -70,7 +72,7 @@ namespace FinanceAPI.Controllers
                     if (usuario == null)
                         return BadRequest(new ApiReturn()
                         {
-                            Sucess = false,
+                            Code = "400",
                             Message = $"Id {id} não existe!"
                         });
                     return Ok(usuario);
@@ -108,9 +110,10 @@ namespace FinanceAPI.Controllers
             {
                 return BadRequest(new ApiReturn()
                 {
-                    Sucess = false,
+                    Code = "400",
                     Message = $"Falha ao incluir registro!",
-                    Detail = e.Message
+                    Type = "error",
+                    DetailedMessage =  e.InnerException is null ? e.Message : e.InnerException.Message
                 });
             }
         }
@@ -121,10 +124,19 @@ namespace FinanceAPI.Controllers
         /// <returns>Usuario persistido no banco ou ApiReturn se ocorrer erro</returns>
         [HttpPost]
         [AllowAnonymous]
+        [EnableCors("DevPolicy")]
         public IActionResult Add(Usuario usuario)
         {
+            
             try
             {
+                bool existeEmail = asQueryable().Where<Usuario>(u => u.Email.ToLower().Equals(usuario.Email)).Count() > 0;
+                if (existeEmail)
+                    return BadRequest(new ApiReturn()
+                    {
+                        Code = "400",
+                        Message = $"Já existe um usuário registrado com e-mail {usuario.Email}",                        
+                    });
                 usuario.Datacriacao = DateTimeOffset.Now;
                 usuario.Dataalteracao = DateTimeOffset.Now;
                 _uow.UsuarioRepository.Insert(usuario);
@@ -135,9 +147,10 @@ namespace FinanceAPI.Controllers
             {
                 return BadRequest(new ApiReturn()
                 {
-                    Sucess = false,
+                    Code = "400",
                     Message = $"Falha ao incluir registro!",
-                    Detail = e.Message
+                    Type = "error",
+                    DetailedMessage =  e.InnerException is null ? e.Message : e.InnerException.Message
                 });
             }
         }
@@ -148,6 +161,7 @@ namespace FinanceAPI.Controllers
         /// <returns>Usuario persistido no banco ou ApiReturn se ocorrer erro</returns>
         [HttpPut]
         [Authorize]
+        [EnableCors("DevPolicy")]
         public IActionResult Edit(Usuario usuario)
         {
             try
@@ -156,7 +170,7 @@ namespace FinanceAPI.Controllers
                 if (usuarioAtual == null)
                     return BadRequest(new ApiReturn()
                     {
-                        Sucess = false,
+                        Code = "400",
                         Message = $"Id {usuario.Id} não existe!"
                     });
 
@@ -170,9 +184,10 @@ namespace FinanceAPI.Controllers
             {
                 return BadRequest(new ApiReturn()
                 {
-                    Sucess = false,
+                    Code = "400",
                     Message = $"Falha ao alterar registro!",
-                    Detail = e.Message
+                    Type = "error",
+                    DetailedMessage =  e.InnerException is null ? e.Message : e.InnerException.Message
                 });
             }
 
@@ -185,6 +200,7 @@ namespace FinanceAPI.Controllers
         /// <returns>ApiReturn indicado o sucesso ou falha</returns>
         [HttpDelete]
         [Authorize]
+        [EnableCors("DevPolicy")]
         public IActionResult Delete(Guid id)
         {
             try
@@ -193,7 +209,7 @@ namespace FinanceAPI.Controllers
                 if (usuarioAtual == null)
                     return BadRequest(new ApiReturn()
                     {
-                        Sucess = false,
+                        Code = "400",
                         Message = $"Id {id} não existe!"
                     });
 
@@ -201,24 +217,27 @@ namespace FinanceAPI.Controllers
                 _uow.Commit();
                 return Ok(new ApiReturn()
                     {
-                        Sucess = true,
-                        Message = $"Registro removido com sucesso!"
-                    });
+                        Code="204",
+                        Message = $"Registro removido com sucesso!",
+                        Type = "information",
+                });
             }
             catch (Exception e)
             {
                 return BadRequest(new ApiReturn()
                 {
-                    Sucess = false,
+                    Code = "400",
                     Message = $"Falha ao excluir registro!",
-                    Detail = e.Message
+                    Type = "error",
+                    DetailedMessage =  e.InnerException is null ? e.Message : e.InnerException.Message
                 });
             }
-
+            
         }
 
         [HttpPost("login")]
         [AllowAnonymous]
+        [EnableCors("DevPolicy")]
         public async Task<ActionResult<dynamic>> Authenticate([FromBody] LoginDTO login)
         {
             // Recupera o usuário
@@ -226,7 +245,7 @@ namespace FinanceAPI.Controllers
 
             // Verifica se o usuário existe
             if (user == null)
-                return NotFound(new ApiReturn() { Sucess = false, Message= $"Usuário {login.Email} não encontrado!"});
+                return NotFound(new ApiReturn() { Code = "400", Message= $"Usuário {login.Email} não encontrado!"});
 
             // Gera o Token
             var token = TokenService.GenerateToken(user);
@@ -235,11 +254,12 @@ namespace FinanceAPI.Controllers
             user.Senha = "";
 
             // Retorna os dados
-            return new ApiReturn(){
-                Sucess = true,
+            return Ok(new ApiReturn(){
+                Code="201",
                 Message = "Login realizado com sucesso!",
-                Detail = token 
-            };
+                DetailedMessage = token,
+                Type = "information",
+            });
         }
 
     }
