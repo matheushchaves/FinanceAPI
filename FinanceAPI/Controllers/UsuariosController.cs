@@ -254,12 +254,7 @@ namespace FinanceAPI.Controllers
             user.Senha = "";
 
             // Retorna os dados
-            return Ok(new ApiReturn(){
-                Code="201",
-                Message = "Login realizado com sucesso!",
-                DetailedMessage = token,
-                Type = "information",
-            });
+            return Ok(new {token, user});
         }
 
     }
