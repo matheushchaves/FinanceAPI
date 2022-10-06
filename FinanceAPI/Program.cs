@@ -51,9 +51,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "DevPolicy",
                       policy =>
                       {
-                          policy.WithOrigins("*")
+                          policy.WithOrigins("*").AllowAnyOrigin()
                           .AllowAnyHeader()
-                            .AllowAnyMethod();
+                            .AllowAnyMethod().WithExposedHeaders("*");
                       });
 });
 
@@ -109,10 +109,10 @@ app.UseSwaggerUI();
 app.UseHttpLogging();
 app.UseHttpsRedirection();
 
+app.UseCors(); // deve ficar antes do UseAuthentication e UseAuthorization
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors();
 
 app.MapControllers();
 

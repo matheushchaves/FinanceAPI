@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace FinanceAPI.Controllers
 {
@@ -159,9 +160,9 @@ namespace FinanceAPI.Controllers
         /// </summary>
         /// <param name="usuario">Usuario usado para persistir no banco</param>
         /// <returns>Usuario persistido no banco ou ApiReturn se ocorrer erro</returns>
-        [HttpPut]
-        [Authorize]
         [EnableCors("DevPolicy")]
+        [Authorize]
+        [HttpPut]
         public IActionResult Edit(Usuario usuario)
         {
             try
