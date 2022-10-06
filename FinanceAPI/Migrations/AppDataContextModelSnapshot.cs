@@ -46,7 +46,7 @@ namespace FinanceAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Senha")
+                    b.Property<string>("SenhaSalva")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -67,7 +67,7 @@ namespace FinanceAPI.Migrations
                             Email = "matheushchaves@gmail.com",
                             Nome = "Administrador",
                             Regra = "ADMIN",
-                            Senha = "1Qaz!@#"
+                            SenhaSalva = "tkzRIX7li1idj3UA/mjShA=="
                         });
                 });
 #pragma warning restore 612, 618

@@ -1,8 +1,11 @@
-﻿namespace FinanceAPI.Data.DTOs
+﻿using FinanceAPI.Helpers;
+
+namespace FinanceAPI.Data.DTOs
 {
     public class LoginDTO
     {
         public string Email { get; set; }
         public string Senha { get; set; }
-    }
+        
+}
 }

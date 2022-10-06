@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinanceAPI.Migrations
 {
     [DbContext(typeof(AppDataContext))]
-    [Migration("20221001130153_RegraUnicoEmail")]
-    partial class RegraUnicoEmail
+    [Migration("20221006133137_CriandoDB")]
+    partial class CriandoDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -48,7 +48,7 @@ namespace FinanceAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Senha")
+                    b.Property<string>("SenhaSalva")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -69,7 +69,7 @@ namespace FinanceAPI.Migrations
                             Email = "matheushchaves@gmail.com",
                             Nome = "Administrador",
                             Regra = "ADMIN",
-                            Senha = "1Qaz!@#"
+                            SenhaSalva = "tkzRIX7li1idj3UA/mjShA=="
                         });
                 });
 #pragma warning restore 612, 618

@@ -17,14 +17,16 @@ namespace FinanceAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Email = table.Column<string>(type: "longtext", nullable: false)
+                    Email = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Senha = table.Column<string>(type: "longtext", nullable: false)
+                    SenhaSalva = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Nome = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DataCriacao = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: false),
-                    DataAlteracao = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: false),
+                    Regra = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Datacriacao = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: false),
+                    Dataalteracao = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: false),
                     Bloqueado = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
@@ -32,6 +34,17 @@ namespace FinanceAPI.Migrations
                     table.PrimaryKey("PK_Usuarios", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "Usuarios",
+                columns: new[] { "Id", "Bloqueado", "Dataalteracao", "Datacriacao", "Email", "Nome", "Regra", "SenhaSalva" },
+                values: new object[] { new Guid("79aed679-3622-42ae-8f59-1dd31cede462"), false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), "matheushchaves@gmail.com", "Administrador", "ADMIN", "tkzRIX7li1idj3UA/mjShA==" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Usuarios_Email",
+                table: "Usuarios",
+                column: "Email",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

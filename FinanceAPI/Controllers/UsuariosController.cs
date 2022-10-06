@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FinanceAPI.Data;
 using FinanceAPI.Data.DTOs;
+using FinanceAPI.Helpers;
 using FinanceAPI.Helpers.Http;
 using FinanceAPI.Models;
 using FinanceAPI.Service;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
 
 namespace FinanceAPI.Controllers
@@ -17,13 +19,15 @@ namespace FinanceAPI.Controllers
     public class UsuariosController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
         /// <summary>
         /// Acesso a todos os repositorios
         /// </summary>
         /// <param name="uow"></param>
-        public UsuariosController(IUnitOfWork uow)
+        public UsuariosController(IUnitOfWork uow, IMapper mapper)
         {
             _uow = uow;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -142,7 +146,7 @@ namespace FinanceAPI.Controllers
                 usuario.Dataalteracao = DateTimeOffset.Now;
                 _uow.UsuarioRepository.Insert(usuario);
                 _uow.Commit();
-                return Ok(usuario);
+                return Ok(_mapper.Map<UserDTO>(usuario));
             }
             catch (Exception e)
             {
@@ -179,7 +183,7 @@ namespace FinanceAPI.Controllers
                 usuario.Datacriacao = usuarioAtual.Datacriacao;
                 _uow.UsuarioRepository.Update(usuario);
                 _uow.Commit();
-                return Ok(usuario);
+                return Ok(_mapper.Map<UserDTO>(usuario));
             }
             catch (Exception e)
             {
@@ -241,19 +245,22 @@ namespace FinanceAPI.Controllers
         [EnableCors("DevPolicy")]
         public async Task<ActionResult<dynamic>> Authenticate([FromBody] LoginDTO login)
         {
+            string senha = EncryptionHelper.Encrypt(login.Senha);
             // Recupera o usuário
-            var user = asQueryable().Where<Usuario>(u => u.Email.ToLower().Equals(login.Email.ToLower()) && u.Senha.Equals(login.Senha)).AsNoTracking().SingleOrDefault();
+            var usuario = asQueryable().Where<Usuario>(
+                    u => u.Email.ToLower().Equals(login.Email.ToLower()) && 
+                         u.SenhaSalva.Equals(senha)
+                         ).AsNoTracking().SingleOrDefault();
 
             // Verifica se o usuário existe
-            if (user == null)
+            if (usuario == null)
                 return NotFound(new ApiReturn() { Code = "400", Message= $"Usuário {login.Email} não encontrado!"});
 
             // Gera o Token
-            var token = TokenService.GenerateToken(user);
+            var token = TokenService.GenerateToken(usuario);
 
-            // Oculta a senha
-            user.Senha = "";
-
+            var user = _mapper.Map<UserDTO>(usuario);
+                            
             // Retorna os dados
             return Ok(new {token, user});
         }
