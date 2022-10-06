@@ -108,7 +108,7 @@ namespace FinanceAPI.Controllers
                     if (email != null)
                         queryable = queryable.Where(u => u.Email.ToLower().Contains(email.ToLower()));
 
-                    return Ok(await PageList<Usuario>.ToPagedList(queryable, pageParams.Page, pageParams.PageSize));
+                    return Ok(await PageList<Usuario,UserDTO>.ToPagedList(queryable, pageParams.Page, pageParams.PageSize, _mapper));
                 }
             }
             catch (Exception e)
