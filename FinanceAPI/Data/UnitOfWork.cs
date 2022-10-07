@@ -29,6 +29,12 @@ namespace FinanceAPI.Data
             get { return usuarioRepository = usuarioRepository ?? new UsuarioRepository(adc); }
         }
 
+        private ICategoriaRepository categoriaRepository;
+        public ICategoriaRepository CategoriaRepository
+        {
+            get { return categoriaRepository = categoriaRepository ?? new CategoriaRepository(adc); }
+        }
+
 
 
 

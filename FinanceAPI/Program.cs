@@ -11,6 +11,7 @@ using NuGet.Configuration;
 using System.Text;
 using FinanceAPI.Helpers;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +86,8 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+builder.Services.AddControllers().AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddHttpLogging(logging =>
 {

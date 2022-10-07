@@ -33,5 +33,7 @@ namespace FinanceAPI.Models
 
         public string Regra { get; set; } = "USER";
 
+        public ICollection<Categoria> Categorias { get; set; }
+
     }
 }

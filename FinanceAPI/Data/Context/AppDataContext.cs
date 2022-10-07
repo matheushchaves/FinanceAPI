@@ -1,5 +1,6 @@
 ﻿using FinanceAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace FinanceAPI.Data.Context
 {
@@ -8,6 +9,7 @@ namespace FinanceAPI.Data.Context
         public AppDataContext(DbContextOptions<AppDataContext> options) : base(options) { }
 
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Categoria> Categorias { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,6 +24,11 @@ namespace FinanceAPI.Data.Context
             });
 
             modelBuilder.Entity<Usuario>().HasIndex(u => u.Email).IsUnique();
+
+            modelBuilder.Entity<Categoria>()
+               .HasOne<Usuario>(c=> c.Usuario)
+               .WithMany(c => c.Categorias)               
+               .IsRequired(); ;
         }
 
     }
