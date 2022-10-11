@@ -7,7 +7,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace FinanceAPI.Models
 {
     public class Usuario : Entidade
-    {        
+    {
+
+        public Usuario()
+        {
+            Categorias = new List<Categoria>() { };
+        }
+
         [Required(ErrorMessage = "Email é obrigatório")]
         public string Email { get; set; } = "";
                 
